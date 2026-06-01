@@ -85,7 +85,7 @@ function Realtime() {
                     <button
                       onClick={() => updatePending(selected, index, '-')}
                       className="w-6 h-6 rounded-full bg-red-100 text-red-500 text-xs font-bold flex items-center justify-center"
-                    >
+                    >   
                       -
                     </button>
                   </div>
