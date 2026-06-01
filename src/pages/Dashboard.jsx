@@ -1,16 +1,34 @@
 import { useNavigate } from 'react-router-dom';
-
+import { useInventory } from '../context/InventoryContext';
 const menuItems = [
   { icon: '🤖', label: 'AI 명세서 분석', path: '/scanner' },
   { icon: '📦', label: '재고 관리', path: '/manage' },
-  { icon: '📊', label: '데이터 분석', path: '/analytics' },
+  { icon: '📊', label: '데이터 분석', path: '/graph' },
   { icon: '🔴', label: '실시간 재고', path: '/realtime' },
   { icon: '🏷️', label: '상품 등록', path: '/product' },
   { icon: '📢', label: '공지사항', path: '/notice' },
-  { icon: '⚙️', label: '전체 보기', path: '/setting' },
+  { icon: '⚙️', label: '설정', path: '/setting' },
 ];
 function Dashboard() {
   const navigate = useNavigate();
+  const { inventory, logs } = useInventory();
+
+  const totalItems = Object.values(inventory).flat().length;
+  const lowItems = Object.values(inventory).flat().filter((i) => i.current < i.safe).length;
+  const today = new Date();
+  const todayLogs = logs.filter((log) => {
+    const d = new Date(log.ts);
+    return (
+      d.getFullYear() === today.getFullYear() &&
+      d.getMonth() === today.getMonth() &&
+      d.getDate() === today.getDate()
+    );
+  });
+
+  const todayIn = todayLogs.filter((l) => l.type === 'IN');
+  const todayOut = todayLogs.filter((l) => l.type === 'USE');
+  const todayInQty = todayIn.reduce((sum, l) => sum + l.qty, 0);
+  const todayOutQty = todayOut.reduce((sum, l) => sum + l.qty, 0);
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] pb-20">
@@ -59,26 +77,27 @@ function Dashboard() {
       </div>
 
       {/* 재고 현황 */}
-      <div className="bg-white mx-4 mt-3 rounded-2xl px-5 py-4">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-sm font-bold text-[#1a1a1a]">재고 현황 &gt;</span>
-          <span className="text-xs text-gray-400">실시간 기준</span>
-        </div>
-        <p className="text-4xl font-extrabold text-[#1a1a1a] my-3">24개</p>
-        <div className="border-t border-gray-100 pt-3 flex flex-col gap-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">입고 항목</span>
-            <span className="font-semibold">12개</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">부족 재고</span>
-            <span className="font-semibold text-red-500">3개</span>
-          </div>
-        </div>
-      </div>
+<div className="bg-white mx-4 mt-3 rounded-2xl px-5 py-4">
+  <div className="flex items-center justify-between mb-1">
+    <span className="text-sm font-bold text-[#1a1a1a]">재고 현황 &gt;</span>
+    <span className="text-xs text-gray-400">실시간 기준</span>
+  </div>
+  <p className="text-4xl font-extrabold text-[#1a1a1a] my-3">{totalItems}개</p>
+  <div className="border-t border-gray-100 pt-3 flex flex-col gap-2">
+    <div className="flex justify-between text-sm">
+      <span className="text-gray-500">전체 품목</span>
+      <span className="font-semibold">{totalItems}개</span>
+    </div>
+    <div className="flex justify-between text-sm">
+      <span className="text-gray-500">부족 재고</span>
+      <span className={`font-semibold ${lowItems > 0 ? 'text-red-500' : 'text-gray-800'}`}>
+        {lowItems}개
+      </span>
+    </div>
+  </div>
+</div>
 
-
-          {/* 오늘 입출고 요약 */}
+{/* 오늘 입출고 요약 */}
 <div className="bg-white mx-4 mt-3 rounded-2xl px-5 py-4">
   <div className="flex items-center justify-between mb-3">
     <span className="text-sm font-bold text-[#1a1a1a]">오늘 입출고 요약</span>
@@ -87,13 +106,13 @@ function Dashboard() {
   <div className="grid grid-cols-2 gap-3">
     <div className="bg-blue-50 rounded-2xl px-4 py-3 flex flex-col gap-1">
       <span className="text-xs text-blue-400 font-semibold">입고</span>
-      <span className="text-2xl font-extrabold text-blue-500">8건</span>
-      <span className="text-xs text-gray-400">총 24개 항목</span>
+      <span className="text-2xl font-extrabold text-blue-500">{todayIn.length}건</span>
+      <span className="text-xs text-gray-400">총 {todayInQty}개 항목</span>
     </div>
     <div className="bg-red-50 rounded-2xl px-4 py-3 flex flex-col gap-1">
       <span className="text-xs text-red-400 font-semibold">출고</span>
-      <span className="text-2xl font-extrabold text-red-500">5건</span>
-      <span className="text-xs text-gray-400">총 18개 항목</span>
+      <span className="text-2xl font-extrabold text-red-500">{todayOut.length}건</span>
+      <span className="text-xs text-gray-400">총 {todayOutQty}개 항목</span>
     </div>
   </div>
 </div>
