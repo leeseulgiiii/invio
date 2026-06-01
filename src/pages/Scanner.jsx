@@ -6,7 +6,8 @@ const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
 const CATEGORIES = ['상온', '냉장', '냉동', '비품'];
 
 function Scanner() {
-  const { inventory, loadFromExcel } = useInventory();
+
+  const { inventory, bulkAddStock } = useInventory();
   const [image, setImage] = useState(null);
   const [imageBase64, setImageBase64] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -33,9 +34,10 @@ function Scanner() {
 
     try {
       const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-      const prompt = `이 거래 명세서 이미지를 분석해서 품목명과 수량을 JSON 배열로만 반환해줘.
+      const prompt =  `이 거래 명세서 이미지를 분석해서 품목명과 수량을 JSON 배열로만 반환해줘.
 다른 설명 없이 JSON만 반환해야 해.
 형식: [{"name": "품목명", "quantity": 수량, "unit": "단위"}]
+품목명은 띄어쓰기 없이 붙여서 반환해줘. (예: "우유", "원두", "냉동딸기")
 단위는 개, 팩, 박스, 병, kg 중에서 선택해줘.
 수량은 숫자로만 반환해줘.`;
 
@@ -98,15 +100,14 @@ function Scanner() {
 
   const handleApply = () => {
     if (!result) return;
-    const data = result.map((item, index) => ({
-      ID: index + 1,
+
+    const items = result.map((item) => ({
       category: item.category,
-      name: item.name,
-      current_stock: item.quantity,
-      safety_stock: item.safeStock === '' ? 0 : Number(item.safeStock),
-      unit: item.unit,
+      name: item.name.replace(/\s+/g, '').trim(), // 띄어쓰기 제거해서 통일
+      qty: item.quantity,
     }));
-    loadFromExcel(data);
+
+    bulkAddStock(items);
     alert('재고에 반영됐어요!');
     setImage(null);
     setImageBase64(null);
