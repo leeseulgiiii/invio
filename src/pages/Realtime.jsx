@@ -4,8 +4,10 @@ import { useInventory } from '../context/InventoryContext';
 const categories = ['비품', '상온', '냉장', '냉동'];
 
 function Realtime() {
-  const { inventory, updateStock } = useInventory();
+  const { inventory, pending, updatePending, commitChanges } = useInventory();
   const [selected, setSelected] = useState('냉동');
+
+  const pendingCount = Object.keys(pending).length;
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] pb-20">
@@ -25,7 +27,7 @@ function Realtime() {
       {/* 타이틀 */}
       <div className="px-5 pt-5 pb-3">
         <h2 className="text-lg font-extrabold text-[#3b2a1a]">실시간 재고 현황</h2>
-        <p className="text-xs text-[#a08060] mt-1">카테고리별 현재 재고를 확인해요</p>
+        <p className="text-xs text-[#a08060] mt-1">변경 후 등록 버튼을 눌러주세요</p>
       </div>
 
       {/* 카테고리 탭 */}
@@ -49,7 +51,7 @@ function Realtime() {
           <span className="text-sm font-bold text-[#a08060] col-span-2">품목</span>
           <span className="text-sm font-bold text-[#a08060] text-center">현재고</span>
           <span className="text-sm font-bold text-[#a08060] text-center">안전재고</span>
-          <span className="text-sm font-bold text-[#a08060] text-center">재고변동</span>
+          <span className="text-sm font-bold text-[#a08060] text-center">변동</span>
         </div>
 
         {inventory[selected].length === 0 ? (
@@ -58,30 +60,54 @@ function Realtime() {
           </div>
         ) : (
           <div className="flex flex-col gap-1">
-            {inventory[selected].map((item, index) => (
-              <div key={index} className="grid grid-cols-5 py-2 border-b border-gray-50 last:border-0 items-center">
-                <span className="text-sm text-[#1a1a1a] font-semibold col-span-2">{item.name}</span>
-                <span className="text-sm font-bold text-[#3b2a1a] text-center">{item.current}</span>
-                <span className="text-sm font-bold text-[#a08060] text-centenpr">{item.safe}</span>
-                <div className="flex items-center justify-center gap-1">
-                  <button
-                    onClick={() => updateStock(selected, index, '+')}
-                    className="w-6 h-6 rounded-full bg-blue-100 text-blue-500 text-xs font-bold flex items-center justify-center"
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={() => updateStock(selected, index, '-')}
-                    className="w-6 h-6 rounded-full bg-red-100 text-red-500 text-xs font-bold flex items-center justify-center"
-                  >
-                    -
-                  </button>
+            {inventory[selected].map((item, index) => {
+              const key = `${selected}-${item.name}`;
+              const delta = pending[key]?.delta ?? 0;
+              return (
+                <div key={index} className="grid grid-cols-5 py-2 border-b border-gray-50 last:border-0 items-center">
+                  <span className="text-sm text-[#1a1a1a] font-semibold col-span-2">{item.name}</span>
+                  <span className="text-sm font-bold text-[#3b2a1a] text-center">
+                    {item.current}
+                    {delta !== 0 && (
+                      <span className={`text-xs ml-1 ${delta > 0 ? 'text-blue-400' : 'text-red-400'}`}>
+                        ({delta > 0 ? '+' : ''}{delta})
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-sm font-bold text-[#a08060] text-center">{item.safe}</span>
+                  <div className="flex items-center justify-center gap-1">
+                    <button
+                      onClick={() => updatePending(selected, index, '+')}
+                      className="w-6 h-6 rounded-full bg-blue-100 text-blue-500 text-xs font-bold flex items-center justify-center"
+                    >
+                      +
+                    </button>
+                    <button
+                      onClick={() => updatePending(selected, index, '-')}
+                      className="w-6 h-6 rounded-full bg-red-100 text-red-500 text-xs font-bold flex items-center justify-center"
+                    >
+                      -
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
+
+      {/* 등록 버튼 */}
+      {pendingCount > 0 && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-md px-4">
+          <button
+            onClick={commitChanges}
+            className="w-full py-3.5 bg-[#3b2a1a] text-white font-bold rounded-2xl shadow-lg text-sm"
+          >
+            재고 변동 등록하기 ({pendingCount}개 품목)
+          </button>
+        </div>
+      )}
+
     </div>
   );
 }

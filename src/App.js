@@ -7,6 +7,8 @@ import Setting from './pages/Setting';
 import Navbar from './components/Navbar';
 import Realtime from './pages/Realtime';
 import Product from './pages/Product';
+import Notice from './pages/Notice';
+
 function App() {
   return (
     <BrowserRouter>
@@ -19,6 +21,7 @@ function App() {
           <Route path="/setting" element={<Setting />} />
           <Route path="/realtime" element={<Realtime />} />
           <Route path="/product" element={<Product />} />
+          <Route path="/notice" element={<Notice />} />
         </Routes>
         <Navbar />
       </div>

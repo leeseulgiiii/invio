@@ -6,7 +6,7 @@ function Navbar() {
 
   const menus = [
     { path: '/', label: '홈', icon: '🏠' },
-    { path: '/graph', label: '데이터 분석', icon: '📊' },
+    { path: '/realtime', label: '실시간 재고', icon: '🔴' },
     { path: '/manage', label: '재고관리', icon: '📋' },
     
     { path: '/setting', label: '설정', icon: '⚙️' },
