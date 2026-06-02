@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '../context/InventoryContext';
+import { Link } from 'react-router-dom';
+
 const menuItems = [
   { icon: '🤖', label: 'AI 명세서 분석', path: '/scanner' },
   { icon: '📦', label: '재고 관리', path: '/manage' },
@@ -77,12 +79,17 @@ function Dashboard() {
       </div>
 
       {/* 재고 현황 */}
-<div className="bg-white mx-4 mt-3 rounded-2xl px-5 py-4">
+<Link 
+  to="/manage" 
+  className="block bg-white mx-4 mt-3 rounded-2xl px-5 py-4 cursor-pointer hover:shadow-sm transition-shadow"
+>
   <div className="flex items-center justify-between mb-1">
     <span className="text-sm font-bold text-[#1a1a1a]">재고 현황 &gt;</span>
     <span className="text-xs text-gray-400">실시간 기준</span>
   </div>
+  
   <p className="text-4xl font-extrabold text-[#1a1a1a] my-3">{totalItems}개</p>
+  
   <div className="border-t border-gray-100 pt-3 flex flex-col gap-2">
     <div className="flex justify-between text-sm">
       <span className="text-gray-500">전체 품목</span>
@@ -95,7 +102,7 @@ function Dashboard() {
       </span>
     </div>
   </div>
-</div>
+</Link>
 
 {/* 오늘 입출고 요약 */}
 <div className="bg-white mx-4 mt-3 rounded-2xl px-5 py-4">
