@@ -11,10 +11,10 @@ const menuItems = [
   { icon: '📢', label: '공지사항', path: '/notice' },
   { icon: '⚙️', label: '설정', path: '/setting' },
 ];
+
 function Dashboard() {
   const navigate = useNavigate();
   const { inventory, logs } = useInventory();
-
   const totalItems = Object.values(inventory).flat().length;
   const lowItems = Object.values(inventory).flat().filter((i) => i.current < i.safe).length;
   const today = new Date();
